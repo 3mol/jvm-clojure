@@ -53,14 +53,31 @@
 (defn newZipEntry [path]
   (new ZipEntry (getAbsPath path)))
 
-(defn newWildcardEntry [path]
-  (new WildcardEntry (getAbsPath path)))
+(mapv str (filter #(.isFile %) (file-seq (clojure.java.io/file "."))))
 
 (declare newEntry)
 
+(defn newWildcardEntry [path]
+  ; remove last str *
+  (let [jar-files (->> (subs path 0 (dec (count path)))
+                       clojure.java.io/file
+                       file-seq
+                       (filter #(.isFile %))
+                       (filter (fn [x] (let [lower-case (string/lower-case (.getName x))]
+                                         (or
+                                           (string/ends-with? lower-case ".jar")
+                                           (string/ends-with? lower-case ".zip"))
+                                         )))
+                       (map #(.getAbsolutePath %))
+                       (map #(newEntry %))
+                       )]
+    (new CompositeEntry jar-files)
+    )
+  )
+
+
 (defn newCompositeEntries [paths]
   (let [entries (->> (string/split paths #":") (map #(newEntry %)))]
-    (println entries)
     (new CompositeEntry entries))
   )
 

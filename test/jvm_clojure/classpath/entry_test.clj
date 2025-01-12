@@ -8,7 +8,7 @@
     (is (= "abc"
            (:data (read-class (newDirEntry "/home/huyujing/IdeaProjects/jvm-clojure/resources/testfiles") "test-file-abc.txt")))))
 
-  (testing "abc"
+  (testing "123"
     (is (= "123"
            (:data (read-class (newZipEntry "/home/huyujing/IdeaProjects/jvm-clojure/resources/testfiles/test-zip-file.zip") "abcd")))))
   )
@@ -17,4 +17,10 @@
   (testing "abc"
     (is (= "abc"
            (:data (read-class (newCompositeEntries "/home/huyujing/IdeaProjects/jvm-clojure/resources/testfiles") "test-file-abc.txt")))))
+  )
+
+(deftest newWildcardEntry-test
+  (testing "123"
+    (is (= "123"
+           (:data (read-class (newWildcardEntry "/home/huyujing/IdeaProjects/jvm-clojure/resources/testfiles/*") "abcd")))))
   )
