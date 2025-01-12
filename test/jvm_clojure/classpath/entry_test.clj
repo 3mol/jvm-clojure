@@ -12,3 +12,9 @@
     (is (= "123"
            (:data (read-class (newZipEntry "/home/huyujing/IdeaProjects/jvm-clojure/resources/testfiles/test-zip-file.zip") "abcd")))))
   )
+
+(deftest newCompositeEntries-test
+  (testing "abc"
+    (is (= "abc"
+           (:data (read-class (newCompositeEntries "/home/huyujing/IdeaProjects/jvm-clojure/resources/testfiles") "test-file-abc.txt")))))
+  )

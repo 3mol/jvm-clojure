@@ -1,5 +1,6 @@
 (ns jvm-clojure.classpath.entry
   (:require [clojure.java.io :as io]
+            [clojure.string :as string]
             [jvm-clojure.utils :as utils]
             ))
 
@@ -18,10 +19,14 @@
     (str "path: " path)
     ))
 
-(defrecord CompositeEntry [path]
+(defrecord CompositeEntry [entries]
   Entry
-  (read-class [this class-name])
-  (tostring [this]))
+  (read-class [this class-name]
+    (some #(read-class % class-name) entries)
+    )
+  (tostring [this]
+    (string/join ":" (map tostring entries))
+    ))
 
 (defrecord WildcardEntry [path]
   Entry
@@ -48,21 +53,25 @@
 (defn newZipEntry [path]
   (new ZipEntry (getAbsPath path)))
 
-(defn newCompositeEntry [path]
-  (new CompositeEntry (getAbsPath path)))
-
 (defn newWildcardEntry [path]
   (new WildcardEntry (getAbsPath path)))
 
+(declare newEntry)
+
+(defn newCompositeEntries [paths]
+  (let [entries (->> (string/split paths #":") (map #(newEntry %)))]
+    (println entries)
+    (new CompositeEntry entries))
+  )
 
 (defn newEntry [path]
-  ; when contains "/" -> new CompositeEntry
+  ; when contains ":" -> new CompositeEntry
   ; when file ends with  "*" -> new WildcardEntry
   ; when file ends with  ".jar" or ".JAR" or ".zip" or ".ZIP" -> new ZipEntry
   ; else -> new DirEntry
   ; using cond match case.
   (cond
-    (.contains path "/") (newCompositeEntry path)
+    (.contains path ":") (newCompositeEntries path)
     (.endsWith path "*") (newWildcardEntry path)
     (.endsWith path ".jar") (newZipEntry path)
     (.endsWith path ".JAR") (newZipEntry path)
