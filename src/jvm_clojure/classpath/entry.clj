@@ -1,5 +1,7 @@
 (ns jvm-clojure.classpath.entry
-  (:require [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [jvm-clojure.utils :as utils]
+            ))
 
 (defprotocol Entry
   (read-class [this class-name])
@@ -27,8 +29,12 @@
   (tostring [this]))
 (defrecord ZipEntry [path]
   Entry
-  (read-class [this class-name])
-  (tostring [this]))
+  (read-class [this class-name]
+    {:data (utils/unzip-and-read path class-name) :entity this}
+    )
+  (tostring [this]
+    (str "path: " path)
+    ))
 
 (defn getAbsPath
   [path]
