@@ -6,7 +6,7 @@
   :dependencies [
                  [org.clojure/clojure "1.11.1"]
                  [org.clojure/tools.cli "1.1.230"]]
-  :main cli-clojure.main
+  :main jvm-clojure.main
   :profiles {:uberjar {:aot :all}
              :dev     {:dependencies [[speclj "3.3.2"]]}}
   :repl-options {:init-ns jvm-clojure.core})
