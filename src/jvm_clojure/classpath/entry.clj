@@ -22,7 +22,7 @@
 (defrecord CompositeEntry [entries]
   Entry
   (read-class [this class-name]
-    (some #(read-class % class-name) entries)
+    (some #(not-empty %) (filter #(not-empty (:data %)) (map #(read-class % class-name) entries)))
     )
   (tostring [this]
     (string/join ":" (map tostring entries))
@@ -48,6 +48,7 @@
   )
 (defn newDirEntry [path]
   ; relation path to abs path
+  (println (list path))
   (new DirEntry (getAbsPath path)))
 
 (defn newZipEntry [path]
@@ -71,6 +72,7 @@
                        (map #(.getAbsolutePath %))
                        (map #(newEntry %))
                        )]
+    (println jar-files)
     (new CompositeEntry jar-files)
     )
   )
@@ -78,6 +80,7 @@
 
 (defn newCompositeEntries [paths]
   (let [entries (->> (string/split paths #":") (map #(newEntry %)))]
+    (println entries)
     (new CompositeEntry entries))
   )
 
