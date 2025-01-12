@@ -5,6 +5,9 @@
 (def cli-options
   [["-h" "--help" "Show help"]
    ["-v" "--version" "Show version"]
+   ["-X" "--xjre XJRE" "Path to jre"
+    :default ""
+    :parse-fn identity]
    ["-c" "--classpath CLASSPATH" "Classpath"
     :default ""
     :parse-fn identity]
@@ -40,8 +43,8 @@
 (defn -main [& args]
   (let [[status msg] (validate-args args)]
     (if (= status :ok)
-      (let [{:keys [classpath arguments]} msg]
-        (println (format "classpath: %s, arguments: %s" classpath arguments))
+      (let [{:keys [classpath xjre arguments]} msg]
+        (println (format "classpath: %s, xjre:%s arguments: %s" classpath xjre arguments))
         )
       (do
         (println msg)
