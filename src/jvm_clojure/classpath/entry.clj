@@ -22,11 +22,12 @@
 (defrecord CompositeEntry [entries]
   Entry
   (read-class [this class-name]
-    (some #(not-empty %) (filter #(not-empty (:data %)) (map #(read-class % class-name) entries)))
-    )
+    (->> entries
+         (map #(read-class % class-name))
+         (filter #(not-empty (:data %)))
+         (some #(not-empty %))))
   (tostring [this]
-    (string/join ":" (map tostring entries))
-    ))
+    (string/join ":" (map tostring entries))))
 
 (defrecord WildcardEntry [path]
   Entry
