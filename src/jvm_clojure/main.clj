@@ -1,5 +1,8 @@
 (ns jvm-clojure.main
-  (:require [clojure.tools.cli :as cli-tool])
+  (:require [clojure.string :as string]
+            [clojure.tools.cli :as cli-tool]
+            [jvm-clojure.classpath.classpath :as classpath]
+            )
   )
 
 (def cli-options
@@ -40,11 +43,21 @@
       :else
       [:ok (merge options {:arguments arguments})])))
 
+(defn start-jvm [xjre classpath arguments]
+  (println (format "classpath: %s, xjre:%s arguments: %s" classpath xjre arguments))
+  (let [classname (string/replace (first arguments) #"\." "/")
+        args (rest arguments)
+        class-data (classpath/read-class (classpath/parse xjre classpath) classname)]
+    (if (not-empty class-data)
+      (println "class Found" class-data)
+      (println "No found class"))))
+
+; lein run java.lang.Object
 (defn -main [& args]
   (let [[status msg] (validate-args args)]
     (if (= status :ok)
       (let [{:keys [classpath xjre arguments]} msg]
-        (println (format "classpath: %s, xjre:%s arguments: %s" classpath xjre arguments))
+        (start-jvm xjre classpath arguments)
         )
       (do
         (println msg)

@@ -35,6 +35,7 @@
 (defrecord ZipEntry [path]
   Entry
   (read-class [this class-name]
+    (println "find zip file: " path)
     {:data (utils/unzip-and-read path class-name) :entity this}
     )
   (tostring [this]

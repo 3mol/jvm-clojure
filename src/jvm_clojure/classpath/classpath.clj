@@ -10,7 +10,6 @@
 (defn find-class [entry classname]
   (println (format "find-class entry: %s classname: %s" entry classname))
   (let [res (entry/read-class entry classname)]
-    (println "data: " read-class)
     res))
 
 (defrecord Classpath [boot-classpath ext-classpath user-classpath]
