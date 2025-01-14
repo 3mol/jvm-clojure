@@ -17,8 +17,11 @@
   (read-class [this classname]
     (let [class-fullname (str classname ".class")
           cp-list (list boot-classpath ext-classpath user-classpath)]
-      (some #(not-empty %) (map #(:data %) (map #(find-class % class-fullname) cp-list)))
-      )
+      (->>
+        cp-list
+        (map #(find-class % class-fullname))
+        (map #(:data %))
+        (some #(not-empty %))))
     )
   (tostring [this]
     (entry/tostring user-classpath)
