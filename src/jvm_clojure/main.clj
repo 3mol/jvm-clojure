@@ -49,7 +49,7 @@
         args (rest arguments)
         class-data (classpath/read-class (classpath/parse xjre classpath) classname)]
     (if (not-empty class-data)
-      (println "class Found" class-data)
+      (println "class Found: " (->> class-data (map #(format "%02x" %))))
       (println "No found class"))))
 
 ; lein run java.lang.Object

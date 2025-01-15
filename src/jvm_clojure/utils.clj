@@ -50,10 +50,10 @@
             (if (= file-name filename)
               (let [out (ByteArrayOutputStream.)
                     _ (io/copy stream out)
-                    content (.toString out "UTF-8")
+                    ;content (.toString out "UTF-8")
                     ]
                 (println (str "查询到目标类: " filename))
-                content
+                (.toByteArray out)
                 )
               (recur))
             ))))))
