@@ -4,6 +4,7 @@
 (defrecord ClassReader [data]
 
   )
+(defn newClassReader [class-data] (new ClassReader class-data))
 
 (defn readUint8 [class-reader]
   (let [
