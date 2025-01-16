@@ -17,5 +17,6 @@
     (is (= '((1 2) (3 4) (5 6) (7 8)) (partition 2 '(1 2 3 4 5 6 7 8))))
     (is (= '(0x0102 0x0304 0x0506) (:value (readUint16s (cr2)))))
     (is (= '(0x07) (:data (:ref (readUint16s (cr2))))))
+    (is (= '(0x00 0x01 0x02 0x03) (:value (readBytes (cr) 4))))
     )
   )

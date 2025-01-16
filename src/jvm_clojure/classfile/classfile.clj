@@ -50,12 +50,10 @@
                  (drop (* 2 length) data-area))}
     )
   )
-(defn readBytes [class-reader]
-  (let [first_ (first (.data class-reader))
-        snd_ (first (rest (.data class-reader)))
-        val (ByteBuffer/wrap (byte-array [first_ snd_]))
-        the_rest (rest (rest (.data class-reader)))
+(defn readBytes [class-reader length]
+  (let [value (take length (.data class-reader))
+        the_rest (drop length (.data class-reader))
         ]
-    {:value (.getShort (.order val ByteOrder/BIG_ENDIAN)), :ref (new ClassReader the_rest)}
+    {:value value, :ref (new ClassReader the_rest)}
     )
   )
