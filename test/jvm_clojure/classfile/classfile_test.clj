@@ -1,6 +1,6 @@
 (ns jvm-clojure.classfile.classfile-test
   (:require [clojure.test :refer :all]
-            [jvm-clojure.classfile.classfile :refer :all])
+            [jvm-clojure.classfile.classreader :refer :all])
   (:import (jvm_clojure.classfile.classfile ClassReader)))
 
 (def data (byte-array [(byte 0x00) (byte 0x01) (byte 0x02) (byte 0x03) (byte 0x04) (byte 0x05) (byte 0x06) (byte 0x07)]))

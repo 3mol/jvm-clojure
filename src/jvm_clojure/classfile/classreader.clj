@@ -1,4 +1,4 @@
-(ns jvm-clojure.classfile.classfile
+(ns jvm-clojure.classfile.classreader
   (:import (java.nio ByteBuffer ByteOrder)))
 
 (defrecord ClassReader [data]
