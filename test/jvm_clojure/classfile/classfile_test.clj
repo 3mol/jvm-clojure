@@ -11,5 +11,5 @@
 (deftest readAndCheckMagic-test
   (testing "read"
     (is (= nil (->> (newClassReader class-data) readAndCheckMagic)))
-    ; (is (thrown? RuntimeException (->> (newClassReader not-class-data) readAndCheckMagic)))
+    (is (thrown? RuntimeException (->> (newClassReader not-class-data) readAndCheckMagic)))
     ))
