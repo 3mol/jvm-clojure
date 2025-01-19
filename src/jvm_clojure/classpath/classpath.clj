@@ -32,8 +32,9 @@
   [opt]
   (if (= opt "")
     (if (System/getenv "JAVA_HOME")
-      (str (System/getenv "JAVA_HOME"))
+      (str (System/getenv "JAVA_HOME") "/jre")
       "/usr/lib/jvm/java-8-openjdk/jre")
+    opt
     )
   )
 (defn parseBootAndExtClasspath [jar-opt]
