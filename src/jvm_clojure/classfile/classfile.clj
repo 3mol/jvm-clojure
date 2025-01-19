@@ -27,7 +27,21 @@
       (throw (RuntimeException. "Class Format Error")))
     )
   )
-(defn readAndCheckVersion [reader])
+(defn readAndCheckVersion [reader]
+  (let [minor-version (->> reader classreader/readUint16 :value)
+        major-version (->> reader classreader/readUint16 :value)
+        ]
+    (cond
+      (= major-version 45)
+      nil
+
+      (and (contains? #{46 47 48 49 50 51 52} major-version) (= minor-version 0))
+      nil
+
+      :else
+      (throw (RuntimeException. "java.lang.UnsupportedVersionError"))
+      )
+    ))
 (defn readConstantPool [reader])
 (defn readMembers [reader constantPool])
 (defn readAttributes [reader constantPool])
