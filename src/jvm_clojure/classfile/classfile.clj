@@ -62,9 +62,9 @@
     )
   )
 (defn readMembers [reader constantPool]
-  (let [memberCount (->> reader classreader/readUint16 :value)
-        (->> (range 0 memberCount) (map (fn [_] (readMember reader constantPool))))
-        ]))
+  (let [memberCount (->> reader classreader/readUint16 :value)]
+    (->> (range 0 memberCount) (map (fn [_] (readMember reader constantPool))))
+    ))
 
 (defn memberName [memberInfo]
   (let [cp (:cp memberInfo)
