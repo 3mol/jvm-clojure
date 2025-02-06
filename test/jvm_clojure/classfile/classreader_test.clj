@@ -1,8 +1,9 @@
 (ns jvm-clojure.classfile.classreader-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer :all]
             [jvm-clojure.classfile.classreader :refer :all]
             [jvm-clojure.classfile.classfile :refer :all])
-  )
+  (:import (java.io ByteArrayOutputStream DataInputStream)))
 
 (def data (byte-array [(byte 0x00) (byte 0x01) (byte 0x02) (byte 0x03) (byte 0x04) (byte 0x05) (byte 0x06) (byte 0x07)]))
 (def data2 (byte-array [(byte 0x00) (byte 0x03) (byte 0x01) (byte 0x02) (byte 0x03) (byte 0x04) (byte 0x05) (byte 0x06) (byte 0x07)]))
@@ -30,3 +31,20 @@
                               (is (= 0x00 (:value (readUint8 obj))))
                               (is (= 0x0301 (:value (readUint16 obj))))
                               (deref (:position obj)))))))
+
+(def classfile-path (str "resources/testclass/Main.class"))
+(defn newMainClassData []
+  (let [out (ByteArrayOutputStream.)
+        _ (io/copy (clojure.java.io/input-stream classfile-path) out)
+        ]
+    (.toByteArray out)
+    ))
+
+
+(deftest testClassFile
+  (testing "testClassFile"
+    (is (= 1066 (alength (newMainClassData))))
+    (is (= '(0xCA 0xFE 0xBA 0xBE) (let [is (->> classfile-path clojure.java.io/input-stream (DataInputStream.))]
+                                    (vec (repeatedly 4 #(.readUnsignedByte is))))
+           ))
+    ))
