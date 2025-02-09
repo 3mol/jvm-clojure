@@ -76,6 +76,7 @@
             ]
         {:tag tag :high_bytes high_bytes :low_bytes low_bytes})
 
+    ; todo using 2 entity to represent long and double
     ;CONSTANT_Long	5
     ;CONSTANT_Long_info {
     ;                    u1 tag;
@@ -200,6 +201,7 @@
   )
 (defn read-cp-info [is count]
   ; do count times
+  ; todo using 2 entity to represent long and double, need to fix;
   (vec (repeatedly count
                    #(let [tag (.readUnsignedByte is)
                           info (readInfoArrByTag tag is)]
