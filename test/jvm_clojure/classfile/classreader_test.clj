@@ -218,6 +218,73 @@
                    ))
   )
 
+; attribute_info {
+;    u2 attribute_name_index; // cp类型 CONSTANT_Utf8_info
+;    u4 attribute_length;
+;    u1 info[attribute_length];
+;}
+(defn readAttributeInfo [is count]
+  (vec (repeatedly count
+                   #(let [attribute_name_index (.readUnsignedShort is)
+                          attribute_length (.readInt is)
+                          info (vec (repeatedly attribute_length (fn [] (.readUnsignedByte is))))]
+                      {
+                       :attribute_name_index attribute_name_index
+                       :attribute_length     attribute_length
+                       :info                 info
+                       })
+                   ))
+  )
+
+; field_info {
+;    u2             access_flags;
+;    u2             name_index; // cp 类型为 CONSTANT_Utf8_info
+;    u2             descriptor_index; // cp 类型 CONSTANT_Utf8_info
+;    u2             attributes_count;
+;    attribute_info attributes[attributes_count];
+;}
+(defn readFieldInfo [is count]
+  (vec (repeatedly count
+                   #(let [access_flag (.readUnsignedShort is)
+                          name_index (.readUnsignedShort is)
+                          descriptor_index (.readUnsignedShort is)
+                          attributes_count (.readUnsignedShort is)
+                          attributes (readAttributeInfo is attributes_count)]
+                      {:access_flag      access_flag
+                       :name_index       name_index
+                       :descriptor_index descriptor_index
+                       :attributes_count attributes_count
+                       :attributes       attributes
+                       }
+                      )
+                   ))
+  )
+
+;method_info {
+;    u2             access_flags;
+;    u2             name_index;
+;    u2             descriptor_index;
+;    u2             attributes_count;
+;    attribute_info attributes[attributes_count];
+;}
+(defn readMethodInfo
+  "docstring"
+  [is count]
+  (vec (repeatedly count
+                   #(let [access_flag (.readUnsignedShort is)
+                          name_index (.readUnsignedShort is)
+                          descriptor_index (.readUnsignedShort is)
+                          attributes_count (.readUnsignedShort is)
+                          attributes (readAttributeInfo is attributes_count)]
+                      {:access_flag      access_flag
+                       :name_index       name_index
+                       :descriptor_index descriptor_index
+                       :attributes_count attributes_count
+                       :attributes       attributes
+                       }
+                      )
+                   ))
+  )
 (deftest testClassFile
   (testing "testClassFile"
     (is (= 1066 (alength (newMainClassData))))
@@ -246,6 +313,9 @@
           attributes (readAttributeInfo _is attributes_count)
           ]
       (println magic minor_version major_version access_flag)
+      (println "fields:" fields)
+      (println "methods:" methods)
+      (println "attributes:" attributes)
       (is (= '(0xCA 0xFE 0xBA 0xBE) magic))
       (is (= 0 minor_version))
       (is (= 52 major_version))
@@ -258,5 +328,9 @@
       (is (= '[14] interfaces))
       (is (= 2 fields_count))
       (is (= 2 (.size fields)))
+      (is (= 5 methods_count))
+      (is (= 5 (.size methods)))
+      (is (= 1 attributes_count))
+      (is (= 1 (.size attributes)))
       )
     ))
