@@ -176,6 +176,26 @@
                    ))
   )
 
+(defn read-cp-info-v2 [is count]
+  ; do count times
+  (loop [times count
+         arr (vec '())]
+    (if (> times 0)
+      (let [tag (.readUnsignedByte is)
+            info (readInfoArrByTag tag is)
+            tag-index-space (if (or (= tag 5) (= tag 6))
+                              2
+                              1)
+            ]
+        ; print if is CONSTANT_Utf8_info
+        (if (= 1 tag)
+          (println info (str "<" (String. (byte-array (:bytes info)) "UTF-8") ">")))
+        (recur (- times tag-index-space) (conj arr info)))
+      arr
+      )
+    )
+  )
+
 (defn read-interface [is count]
   ; do count times
   (vec (repeatedly count
@@ -274,7 +294,7 @@
         minor_version (.readUnsignedShort _is)
         major_version (.readUnsignedShort _is)
         cp_count (.readUnsignedShort _is)
-        cp_info (read-cp-info _is (dec cp_count))
+        cp_info (read-cp-info-v2 _is (dec cp_count))
         access_flag (.readUnsignedShort _is)
         this_class (.readUnsignedShort _is)
         supper_class (.readUnsignedShort _is)
