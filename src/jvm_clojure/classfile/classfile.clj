@@ -164,25 +164,33 @@
     )
   )
 
+(defn read-a-cp-info
+  "docstring"
+  [is]
+  (let [tag (.readUnsignedByte is)
+        info (readInfoArrByTag tag is)
+        tag-index-space (if (or (= tag 5) (= tag 6))
+                          2
+                          1)
+        ]
+    ; print if is CONSTANT_Utf8_info
+    (if (= 1 tag)
+      (println info (str "<" (String. (byte-array (:bytes info)) "UTF-8") ">")))
+    info
+    )
+  )
 (defn read-cp-info-v2 [is count]
   ; do count times
   (loop [times count
          arr (vec '())]
-    (if (> times 0)
-      (let [tag (.readUnsignedByte is)
-            info (readInfoArrByTag tag is)
-            tag-index-space (if (or (= tag 5) (= tag 6))
-                              2
-                              1)
-            ]
-        ; print if is CONSTANT_Utf8_info
-        (if (= 1 tag)
-          (println info (str "<" (String. (byte-array (:bytes info)) "UTF-8") ">")))
-        (recur (- times tag-index-space) (conj arr info)))
-      arr
-      )
-    )
-  )
+    (cond (> times 0)
+          (let [
+                info (read-a-cp-info is)
+                tag (:tag info)
+                tag-index-space (if (or (= tag 5) (= tag 6)) 2 1)]
+            (recur (- times tag-index-space) (conj arr info)))
+          :else
+          arr)))
 
 (defn read-interface [is count]
   ; do count times
