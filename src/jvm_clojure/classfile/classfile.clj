@@ -163,18 +163,6 @@
          {:tag tag :bootstrap_method_attr_index bootstrap_method_attr_index :name_and_type_index name_and_type_index})
     )
   )
-(defn read-cp-info [is count]
-  ; do count times
-  ; todo using 2 entity to represent long and double, need to fix;
-  (vec (repeatedly count
-                   #(let [tag (.readUnsignedByte is)
-                          info (readInfoArrByTag tag is)]
-                      (if (= 1 (:tag info))
-                        (println info (str "<" (String. (byte-array (:bytes info)) "UTF-8") ">"))
-                        (println info))
-                      info)
-                   ))
-  )
 
 (defn read-cp-info-v2 [is count]
   ; do count times
