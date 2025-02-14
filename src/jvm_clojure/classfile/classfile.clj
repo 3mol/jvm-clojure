@@ -3,7 +3,6 @@
   (:import (java.io DataInputStream)
            (jvm_clojure.classfile.classreader ClassReader)))
 
-
 (defn readInfoArrByTag
   "docstring"
   [tag is]
@@ -35,10 +34,9 @@
     ;                     u4 bytes;
     ;                     }
     4 (let [
-            high_bytes (.readUnsignedShort is)
-            low_bytes (.readUnsignedShort is)
+            bytes (vec (repeatedly 4 #(.readUnsignedByte is)))
             ]
-        {:tag tag :high_bytes high_bytes :low_bytes low_bytes})
+        {:tag tag :bytes bytes})
 
     ; todo using 2 entity to represent long and double
     ;CONSTANT_Long	5
@@ -48,8 +46,8 @@
     ;                    u4 low_bytes;
     ;                    }
     5 (let [
-            high_bytes (.readUnsignedShort is)
-            low_bytes (.readUnsignedShort is)
+            high_bytes (vec (repeatedly 4 #(.readUnsignedByte is)))
+            low_bytes (vec (repeatedly 4 #(.readUnsignedByte is)))
             ]
         {:tag tag :high_bytes high_bytes :low_bytes low_bytes})
     ;CONSTANT_Double	6
@@ -60,8 +58,8 @@
     ;                      }
 
     6 (let [
-            high_bytes (.readUnsignedShort is)
-            low_bytes (.readUnsignedShort is)
+            high_bytes (vec (repeatedly 4 #(.readUnsignedByte is)))
+            low_bytes (vec (repeatedly 4 #(.readUnsignedByte is)))
             ]
         {:tag tag :high_bytes high_bytes :low_bytes low_bytes})
 
@@ -168,11 +166,7 @@
   "docstring"
   [is]
   (let [tag (.readUnsignedByte is)
-        info (readInfoArrByTag tag is)
-        tag-index-space (if (or (= tag 5) (= tag 6))
-                          2
-                          1)
-        ]
+        info (readInfoArrByTag tag is)]
     ; print if is CONSTANT_Utf8_info
     (if (= 1 tag)
       (println info (str "<" (String. (byte-array (:bytes info)) "UTF-8") ">")))
@@ -188,6 +182,7 @@
                 info (read-a-cp-info is)
                 tag (:tag info)
                 tag-index-space (if (or (= tag 5) (= tag 6)) 2 1)]
+            (println "info" info)
             (recur (- times tag-index-space) (conj arr info)))
           :else
           arr)))
