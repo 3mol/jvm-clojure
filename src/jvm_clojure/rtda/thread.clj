@@ -93,19 +93,19 @@
 (defn newLocalVars
   "docstring"
   [max-locals]
-  (LocalVars. (vec (repeat max-locals (Slot. nil nil)))))
+  (LocalVars. (vec (repeatedly max-locals #(Slot. (ref nil) (ref nil))))))
 ; getInt(localVars)
 (defn getInt
   "docstring"
   [local-vars index]
-  (as-> local-vars $ (:slots $) (nth $ index) (:num $)))
+  (-> local-vars :slots (nth index) :num deref)
+  )
 ; setInt(localVars)
 (defn setInt
   "docstring"
   [local-vars index num]
-  (let [slot (as-> local-vars $ (:slots $) (nth $ index))
-        new-slot (Slot. num (:ref slot))]
-    (assoc-in local-vars [:slots index] new-slot)))
+  (let [changed-num (-> local-vars :slots (nth index) :num)]
+    (do (dosync (ref-set changed-num num)))))
 
 ; getFloat(localVars)
 (defn getFloat
@@ -159,7 +159,7 @@
 (defn getRef
   "docstring"
   [local-vars index]
-  (as-> local-vars $ (:slots $) (nth $ index) (:ref $))
+  @(as-> local-vars $ (:slots $) (nth $ index) (:ref $))
   )
 
 
