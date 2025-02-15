@@ -1,4 +1,6 @@
-(ns jvm-clojure.rtda.thread)
+(ns jvm-clojure.rtda.thread
+  (:require [jvm-clojure.collections.stack :as stack])
+  )
 
 (defrecord Threadj [pc stack])
 
@@ -163,30 +165,32 @@
   )
 
 
-(defrecord OperandStack [size slots])
+(defrecord OperandStack [size max-size slots])
 ; newOperandStack(maxStack)
 (defn newOperandStack
   "docstring"
   [max-stack]
-  (OperandStack. 0 (vec (repeat max-stack (Slot. nil nil)))))
+  (OperandStack. (ref 0) max-stack (stack/create-stack)))
 ; pushInt
 (defn pushInt
   "docstring"
   [operand-stack num]
-  (let [new-size (+ 1 (:size operand-stack))]
-    (when (> new-size (:max-stack operand-stack))
+  (let [new-size (+ 1 @(:size operand-stack))]
+    (when (> new-size (:max-size operand-stack))
       (throw (RuntimeException. "stack overflow")))
-    (assoc-in operand-stack [:slots new-size] (Slot. num nil))
+    (dosync (ref-set (:size operand-stack) new-size))
+    (stack/s-push (:slots operand-stack) num)
     )
   )
 ; popInt
 (defn popInt
   "docstring"
   [operand-stack]
-  (let [new-size (- (:size operand-stack) 1)]
+  (let [new-size (- @(:size operand-stack) 1)]
     (when (< new-size 0)
       (throw (RuntimeException. "stack underflow")))
-    (->> operand-stack :slots (nth new-size) :num)
+    (dosync (ref-set (:size operand-stack) new-size))
+    (stack/s-pop (:slots operand-stack))
     )
   )
 ; pushFloat
@@ -225,21 +229,23 @@
 ; pushRef
 (defn pushRef
   "docstring"
-  [operand-stack ref]
-  (let [new-size (+ 1 (:size operand-stack))]
-    (when (> new-size (:max-stack operand-stack))
+  [operand-stack _ref]
+  (let [new-size (+ 1 @(:size operand-stack))]
+    (when (> new-size (:max-size operand-stack))
       (throw (RuntimeException. "stack overflow")))
-    (assoc-in operand-stack [:slots new-size] (Slot. nil ref))
+    (dosync (ref-set (:size operand-stack) new-size))
+    (stack/s-push (:slots operand-stack) _ref)
     )
   )
 ; popRef
 (defn popRef
   "docstring"
   [operand-stack]
-  (let [new-size (- (:size operand-stack) 1)]
+  (let [new-size (- @(:size operand-stack) 1)]
     (when (< new-size 0)
       (throw (RuntimeException. "stack underflow")))
-    (->> operand-stack :slots (nth new-size) :ref)
+    (dosync (ref-set (:size operand-stack) new-size))
+    (stack/s-pop (:slots operand-stack))
     )
   )
 

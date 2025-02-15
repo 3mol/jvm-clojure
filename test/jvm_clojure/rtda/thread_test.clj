@@ -45,3 +45,26 @@
       )
     )
   )
+
+(deftest newFrame-2-test
+  (testing "newFrame-2"
+    (let [frame (newFrame 100 100)
+          operand-stack (:operand-stack frame)
+          ]
+      (pushInt operand-stack 100)
+      (pushInt operand-stack -100)
+      (pushLong operand-stack 2997924580)
+      (pushLong operand-stack -2997924580)
+      (pushFloat operand-stack 3.1415926)
+      (pushDouble operand-stack 2.71828182845)
+      (pushRef operand-stack nil)
+      (is (= nil (popRef operand-stack)))
+      (is (= 2.71828182845 (popDouble operand-stack)))
+      (is (= 3.1415926 (popFloat operand-stack)))
+      (is (= -2997924580 (popLong operand-stack)))
+      (is (= 2997924580 (popLong operand-stack)))
+      (is (= -100 (popInt operand-stack)))
+      (is (= 100 (popInt operand-stack)))
+      )
+    )
+  )
