@@ -1,6 +1,6 @@
 (ns jvm-clojure.rtda.thread)
 
-(defrecord Thread [pc stack])
+(defrecord Threadj [pc stack])
 
 (defn getPc
   "docstring"
@@ -11,7 +11,7 @@
 (defn setPc
   "docstring"
   [thread new-pc]
-  (->> thread :stack (Thread. new-pc))
+  (->> thread :stack (Threadj. new-pc))
   )
 
 (defn pushFrameToStack
@@ -27,7 +27,7 @@
   [thread frame]
   (let [stack (:stack thread)
         newStack (pushFrameToStack stack frame)]
-    (->> newStack (Thread. (:pc thread)))
+    (->> newStack (Threadj. (:pc thread)))
     )
   )
 
@@ -36,7 +36,7 @@
   [thread]
   (let [stack (:stack thread)
         popFrame (popFrameToStack stack)]
-    (->> (filter #(not (= popFrame %)) (:elements stack)) (Thread. (:pc thread))))
+    (->> (filter #(not (= popFrame %)) (:elements stack)) (Threadj. (:pc thread))))
   )
 
 (defn currentFrame
@@ -98,12 +98,12 @@
 (defn getInt
   "docstring"
   [local-vars index]
-  (->> local-vars :slots (nth index) :num))
+  (as-> local-vars $ (:slots $) (nth $ index) (:num $)))
 ; setInt(localVars)
 (defn setInt
   "docstring"
   [local-vars index num]
-  (let [slot (->> local-vars :slots (nth index))
+  (let [slot (as-> local-vars $ (:slots $) (nth $ index))
         new-slot (Slot. num (:ref slot))]
     (assoc-in local-vars [:slots index] new-slot)))
 
@@ -159,14 +159,89 @@
 (defn getRef
   "docstring"
   [local-vars index]
-  (->> local-vars :slots (nth index) :ref)
+  (as-> local-vars $ (:slots $) (nth $ index) (:ref $))
   )
 
+
+(defrecord OperandStack [size slots])
 ; newOperandStack(maxStack)
 (defn newOperandStack
   "docstring"
   [max-stack]
-  (Stack. max-stack 0 nil))
+  (OperandStack. 0 (vec (repeat max-stack (Slot. nil nil)))))
+; pushInt
+(defn pushInt
+  "docstring"
+  [operand-stack num]
+  (let [new-size (+ 1 (:size operand-stack))]
+    (when (> new-size (:max-stack operand-stack))
+      (throw (RuntimeException. "stack overflow")))
+    (assoc-in operand-stack [:slots new-size] (Slot. num nil))
+    )
+  )
+; popInt
+(defn popInt
+  "docstring"
+  [operand-stack]
+  (let [new-size (- (:size operand-stack) 1)]
+    (when (< new-size 0)
+      (throw (RuntimeException. "stack underflow")))
+    (->> operand-stack :slots (nth new-size) :num)
+    )
+  )
+; pushFloat
+(defn pushFloat
+  "docstring"
+  [operand-stack num]
+  (pushInt operand-stack num))
+; popFloat
+(defn popFloat
+  "docstring"
+  [operand-stack]
+  (popInt operand-stack))
+; pushLong
+(defn pushLong
+  "docstring"
+  [operand-stack num]
+  (pushInt operand-stack num)
+  )
+; popLong
+(defn popLong
+  "docstring"
+  [operand-stack]
+  (popInt operand-stack))
+; pushDouble
+(defn pushDouble
+  "docstring"
+  [operand-stack num]
+  (pushInt operand-stack num)
+  )
+; popDouble
+(defn popDouble
+  "docstring"
+  [operand-stack]
+  (popInt operand-stack))
+
+; pushRef
+(defn pushRef
+  "docstring"
+  [operand-stack ref]
+  (let [new-size (+ 1 (:size operand-stack))]
+    (when (> new-size (:max-stack operand-stack))
+      (throw (RuntimeException. "stack overflow")))
+    (assoc-in operand-stack [:slots new-size] (Slot. nil ref))
+    )
+  )
+; popRef
+(defn popRef
+  "docstring"
+  [operand-stack]
+  (let [new-size (- (:size operand-stack) 1)]
+    (when (< new-size 0)
+      (throw (RuntimeException. "stack underflow")))
+    (->> operand-stack :slots (nth new-size) :ref)
+    )
+  )
 
 ; newFrame(maxLocals, maxStack)
 (defn newFrame
@@ -176,4 +251,8 @@
 
 ; build whole thread.
 (defn newThread []
-  (Thread. 0 (newStack 1024)))
+  (Threadj. 0 (newStack 1024)))
+
+; mark: _load_ is local-vars load to operand-stack
+; mark: _store_ is operand-stack to local-vars
+; mark: _bipush\ldc etc._ is constants load to operand-stack
