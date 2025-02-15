@@ -87,12 +87,81 @@
 ; we could use a vector to store the local-vars
 (defrecord Frame [lowers local-vars operand-stack])
 (defrecord Slot [num ref])
+(defrecord LocalVars [slots])
 
 ; newLocalVars(maxLocals)
 (defn newLocalVars
   "docstring"
   [max-locals]
-  (vec (repeat max-locals (Slot. nil nil))))
+  (LocalVars. (vec (repeat max-locals (Slot. nil nil)))))
+; getInt(localVars)
+(defn getInt
+  "docstring"
+  [local-vars index]
+  (->> local-vars :slots (nth index) :num))
+; setInt(localVars)
+(defn setInt
+  "docstring"
+  [local-vars index num]
+  (let [slot (->> local-vars :slots (nth index))
+        new-slot (Slot. num (:ref slot))]
+    (assoc-in local-vars [:slots index] new-slot)))
+
+; getFloat(localVars)
+(defn getFloat
+  "docstring"
+  [local-vars index]
+  (getInt local-vars index))
+; setInt(localVars)
+(defn setFloat
+  "docstring"
+  [local-vars index num]
+  (setInt local-vars index num))
+
+; mark setLong, will be split into two slots
+(defn setLong
+  "docstring"
+  [local-vars index num]
+  (setInt local-vars index num)
+  ; (setInt local-vars (inc index) num)
+  )
+
+; getLong
+(defn getLong
+  "docstring"
+  [local-vars index]
+  (getInt local-vars index))
+
+
+; setDouble, will be split into two slots
+(defn setDouble
+  "docstring"
+  [local-vars index num]
+  (setInt local-vars index num)
+  ; (setInt local-vars (inc index) num)
+  )
+
+; getDouble
+(defn getDouble
+  "docstring"
+  [local-vars index]
+  (getInt local-vars index))
+
+; setRef, will be split into two slots
+(defn setRef
+  "docstring"
+  [local-vars index ref]
+  (let [new-slot (Slot. nil ref)]
+    (assoc-in local-vars [:slots index] new-slot))
+  )
+
+; getRef
+(defn getRef
+  "docstring"
+  [local-vars index]
+  (->> local-vars :slots (nth index) :ref)
+  )
+
 ; newOperandStack(maxStack)
 (defn newOperandStack
   "docstring"
